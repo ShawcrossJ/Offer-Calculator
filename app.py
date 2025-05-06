@@ -23,10 +23,10 @@ def compute_npv_and_break_even(price, monthly_revenue, monthly_expense, rate, ma
         cumulative_discounted += discounted
         cumulative_nominal += (monthly_revenue - monthly_expense)
 
-        discounted_npv.append(round(cumulative_discounted, 0))
-        nominal_npv.append(round(cumulative_nominal, 0))
-        revenue_total.append(round(gross, 0))
-        expense_total.append(round(expense, 0))
+        discounted_npv.append(round(cumulative_discounted, 2))
+        nominal_npv.append(round(cumulative_nominal, 2))
+        revenue_total.append(round(gross, 2))
+        expense_total.append(round(expense, 2))
 
         if break_even_month is None and cumulative_discounted >= 0:
             break_even_month = t
@@ -46,7 +46,7 @@ def index():
             rent = float(request.form["rent"])
             expense = float(request.form["expense"])
             rate = float(request.form["rate"]) / 100
-            break_even_input = float(request.form["break_even"])
+            break_even_input = int(float(request.form["break_even"]))
 
             revenue = units * rent
             monthly_profit = revenue - expense
@@ -54,8 +54,14 @@ def index():
             if monthly_profit <= 0:
                 price = "Not possible (expenses too high)"
             else:
-                price = round(monthly_profit * break_even_input, 2)
+                # Calculate discounted price based on break-even input
+                discounted_price = 0
+                for t in range(1, break_even_input + 1):
+                    discount_factor = (1 + rate / 12) ** t
+                    discounted_price += monthly_profit / discount_factor
+                price = round(discounted_price, 2)
 
+            # Generate NPV data using discounted price
             discounted_npv, nominal_npv, revenues, expenses, _ = compute_npv_and_break_even(
                 price, revenue, expense, rate, max_months=60)
 
