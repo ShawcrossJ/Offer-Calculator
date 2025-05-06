@@ -2,7 +2,7 @@ from flask import Flask, render_template, request
 
 app = Flask(__name__)
 
-def compute_npv_and_break_even(price, monthly_revenue, monthly_expense, rate, max_months=600):
+def compute_npv_and_break_even(price, monthly_revenue, monthly_expense, rate, max_months=60):
     discounted_npv = []
     nominal_npv = []
     revenue_total = []
@@ -57,7 +57,7 @@ def index():
                 break_even = round(price / monthly_profit, 2)
 
             discounted_npv, nominal_npv, revenues, expenses, break_even_month = compute_npv_and_break_even(
-                price, revenue, expense, rate)
+                price, revenue, expense, rate, max_months=60)
 
             months = list(range(1, len(discounted_npv) + 1))
             npv_table = list(zip(months, discounted_npv, nominal_npv, revenues, expenses))
