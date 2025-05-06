@@ -23,10 +23,10 @@ def compute_npv_and_break_even(price, monthly_revenue, monthly_expense, rate, ma
         cumulative_discounted += discounted
         cumulative_nominal += (monthly_revenue - monthly_expense)
 
-        discounted_npv.append(round(cumulative_discounted, 2))
-        nominal_npv.append(round(cumulative_nominal, 2))
-        revenue_total.append(round(gross, 2))
-        expense_total.append(round(expense, 2))
+        discounted_npv.append(round(cumulative_discounted, 0))
+        nominal_npv.append(round(cumulative_nominal, 0))
+        revenue_total.append(round(gross, 0))
+        expense_total.append(round(expense, 0))
 
         if break_even_month is None and cumulative_discounted >= 0:
             break_even_month = t
@@ -35,43 +35,43 @@ def compute_npv_and_break_even(price, monthly_revenue, monthly_expense, rate, ma
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    break_even = None
+    price = None
     npv_table = []
-    break_even_month = None
     months = []
+    break_even_input = None
 
     if request.method == "POST":
         try:
             units = float(request.form["units"])
             rent = float(request.form["rent"])
-            price = float(request.form["price"])
             expense = float(request.form["expense"])
             rate = float(request.form["rate"]) / 100
+            break_even_input = float(request.form["break_even"])
 
             revenue = units * rent
             monthly_profit = revenue - expense
 
             if monthly_profit <= 0:
-                break_even = "Never (expenses too high)"
+                price = "Not possible (expenses too high)"
             else:
-                break_even = round(price / monthly_profit, 2)
+                price = round(monthly_profit * break_even_input, 2)
 
-            discounted_npv, nominal_npv, revenues, expenses, break_even_month = compute_npv_and_break_even(
+            discounted_npv, nominal_npv, revenues, expenses, _ = compute_npv_and_break_even(
                 price, revenue, expense, rate, max_months=60)
 
             months = list(range(1, len(discounted_npv) + 1))
             npv_table = list(zip(months, discounted_npv, nominal_npv, revenues, expenses))
 
         except ValueError:
-            break_even = "Invalid input"
+            price = "Invalid input"
 
     return render_template(
         "form.html",
-        break_even=break_even,
-        break_even_month=break_even_month,
+        price=price,
         npv_table=npv_table,
         months=months,
-        discounted_npv=[x[1] for x in npv_table]
+        discounted_npv=[x[1] for x in npv_table],
+        break_even_input=break_even_input
     )
 
 if __name__ == "__main__":
