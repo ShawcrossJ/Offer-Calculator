@@ -15,7 +15,7 @@
     </style>
 </head>
 <body>
-    <h1>Break-Even & NPV Calculator (Monthly View)</h1>
+    <h1>Required Price Calculator (Based on Break-Even Time)</h1>
     <div class="container">
         <div class="left">
             <form method="POST">
@@ -25,25 +25,24 @@
                 <label>Monthly Rent per Unit ($):</label>
                 <input type="text" name="rent" placeholder="800" required><br><br>
 
-                <label>Offered Price ($):</label>
-                <input type="text" name="price" required><br><br>
-
                 <label>Monthly Expenses ($):</label>
                 <input type="text" name="expense" required><br><br>
 
                 <label>Discount Rate (Annual %, e.g. 8):</label>
                 <input type="text" name="rate" placeholder="10" required><br><br>
 
+                <label>Desired Break-Even Time (Months):</label>
+                <input type="text" name="break_even" placeholder="24" required><br><br>
+
                 <button type="submit">Calculate</button>
             </form>
 
-            {% if break_even is not none %}
-                <h2>Break-Even: {{ break_even }} months</h2>
-                <h2>NPV Discounted Break-Even:
-                    {% if break_even_month %}
-                        Month {{ break_even_month }}
+            {% if price is not none %}
+                <h2>Required Price:
+                    {% if price is number %}
+                        ${{ "{:,.2f}".format(price) }}
                     {% else %}
-                        Not reached in 60 months
+                        {{ price }}
                     {% endif %}
                 </h2>
 
@@ -59,10 +58,10 @@
                     {% for row in npv_table %}
                         <tr>
                             <td>{{ row[0] }}</td>
-                            <td>{{ row[3] }}</td>
-                            <td>{{ row[4] }}</td>
-                            <td>{{ row[1] }}</td>
-                            <td>{{ row[2] }}</td>
+                            <td>{{ "{:,.0f}".format(row[3]) }}</td>
+                            <td>{{ "{:,.0f}".format(row[4]) }}</td>
+                            <td>{{ "{:,.0f}".format(row[1]) }}</td>
+                            <td>{{ "{:,.0f}".format(row[2]) }}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -70,7 +69,7 @@
         </div>
 
         <div class="right">
-            {% if break_even is not none %}
+            {% if price is not none %}
                 <h3>NPV (Discounted) Chart:</h3>
                 <canvas id="npvChart" width="600" height="400"></canvas>
                 <script>
@@ -89,8 +88,23 @@
                         },
                         options: {
                             scales: {
-                                x: { title: { display: true, text: 'Month' } },
-                                y: { title: { display: true, text: 'Discounted NPV ($)' } }
+                                x: {
+                                    title: {
+                                        display: true,
+                                        text: 'Month'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Discounted NPV ($)'
+                                    },
+                                    ticks: {
+                                        callback: function(value) {
+                                            return '$' + value.toLocaleString(undefined, { maximumFractionDigits: 0 });
+                                        }
+                                    }
+                                }
                             }
                         }
                     });
