@@ -50,18 +50,18 @@
                 <table border="1">
                     <tr>
                         <th>Month</th>
-                        <th>Total Gross Revenue ($)</th>
-                        <th>Total Expenses ($)</th>
-                        <th>Discounted NPV ($)</th>
-                        <th>Nominal NPV ($)</th>
+                        <th>Total Gross Revenue </th>
+                        <th>Total Expenses </th>
+                        <th>Discounted NPV </th>
+                        <th>Nominal NPV </th>
                     </tr>
                     {% for row in npv_table %}
                         <tr>
                             <td>{{ row[0] }}</td>
-                            <td>{{ "{:,.0f}".format(row[3]) }}</td>
-                            <td>{{ "{:,.0f}".format(row[4]) }}</td>
-                            <td>{{ "{:,.0f}".format(row[1]) }}</td>
-                            <td>{{ "{:,.0f}".format(row[2]) }}</td>
+                            <td>${{ "{:,.0f}".format(row[3]) }}</td>
+                            <td>${{ "{:,.0f}".format(row[4]) }}</td>
+                            <td>${{ "{:,.0f}".format(row[1]) }}</td>
+                            <td>${{ "{:,.0f}".format(row[2]) }}</td>
                         </tr>
                     {% endfor %}
                 </table>
@@ -79,7 +79,7 @@
                         data: {
                             labels: {{ months | tojson }},
                             datasets: [{
-                                label: 'Discounted NPV ($)',
+                                label: 'Discounted NPV',
                                 data: {{ discounted_npv | tojson }},
                                 borderColor: 'blue',
                                 fill: false,
@@ -87,6 +87,17 @@
                             }]
                         },
                         options: {
+                            responsive: true,
+                            plugins: {
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            const val = context.parsed.y;
+                                            return '$' + val.toLocaleString(undefined, { maximumFractionDigits: 0 });
+                                        }
+                                    }
+                                }
+                            },
                             scales: {
                                 x: {
                                     title: {
@@ -97,7 +108,7 @@
                                 y: {
                                     title: {
                                         display: true,
-                                        text: 'Discounted NPV ($)'
+                                        text: 'NPV'
                                     },
                                     ticks: {
                                         callback: function(value) {
