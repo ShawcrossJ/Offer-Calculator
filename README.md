@@ -18,6 +18,7 @@ This Flask web app estimates the required investment price for a rental property
   - Discounted & nominal NPV over 60 months
   - Table of monthly gross revenue, expenses, and NPV values
   - Interactive chart using Chart.js
+  - Try it at https://flaskcalc.onrender.com
 
 ---
 
