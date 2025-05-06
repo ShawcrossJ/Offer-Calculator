@@ -1,0 +1,84 @@
+<<!DOCTYPE html>
+<html>
+<head>
+    <title>Investment Calculator</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <h1>Break-Even & NPV Calculator (Monthly View)</h1>
+    <form method="POST">
+        <label>Number of Units:</label>
+        <input type="text" name="units" required><br><br>
+
+        <label>Monthly Rent per Unit ($):</label>
+        <input type="text" name="rent" required><br><br>
+
+        <label>Offered Price ($):</label>
+        <input type="text" name="price" required><br><br>
+
+        <label>Monthly Expenses ($):</label>
+        <input type="text" name="expense" required><br><br>
+
+        <label>Discount Rate (Annual %, e.g. 8):</label>
+        <input type="text" name="rate" required><br><br>
+
+        <button type="submit">Calculate</button>
+    </form>
+
+    {% if break_even is not none %}
+        <h2>Break-Even: {{ break_even }} months</h2>
+        <h2>NPV Discounted Break-Even:
+            {% if break_even_month %}
+                Month {{ break_even_month }}
+            {% else %}
+                Not reached in 50 years
+            {% endif %}
+        </h2>
+
+        <h3>NPV Table (Monthly):</h3>
+        <table border="1">
+            <tr>
+                <th>Month</th>
+                <th>Discounted NPV ($)</th>
+                <th>Nominal NPV ($)</th>
+                <th>Total Gross Revenue ($)</th>
+                <th>Total Expenses ($)</th>
+            </tr>
+            {% for row in npv_table %}
+                <tr>
+                    <td>{{ row[0] }}</td>
+                    <td>{{ row[1] }}</td>
+                    <td>{{ row[2] }}</td>
+                    <td>{{ row[3] }}</td>
+                    <td>{{ row[4] }}</td>
+                </tr>
+            {% endfor %}
+        </table>
+
+        <h3>NPV (Discounted) Chart:</h3>
+        <canvas id="npvChart" width="800" height="400"></canvas>
+        <script>
+            const ctx = document.getElementById('npvChart').getContext('2d');
+            const chart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: {{ months | tojson }},
+                    datasets: [{
+                        label: 'Discounted NPV ($)',
+                        data: {{ discounted_npv | tojson }},
+                        borderColor: 'blue',
+                        fill: false,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    scales: {
+                        x: { title: { display: true, text: 'Month' } },
+                        y: { title: { display: true, text: 'Discounted NPV ($)' } }
+                    }
+                }
+            });
+        </script>
+    {% endif %}
+</body>
+</html>
